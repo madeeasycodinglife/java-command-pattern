@@ -1,0 +1,155 @@
+**Java Command Pattern: Encapsulating Requests**
+
+The Command Design Pattern is used to encapsulate a request as an object, thereby allowing for parameterization of
+ clients with different requests, queuing of requests, and logging of the requests. It also provides a way to undo or redo operations.
+
+**Example:**
+
+Here's an example of a command pattern in Java that demonstrates a remote control for electronic devices:
+
+     +-------------------+          +-------------------+
+     |   RemoteControl   |          |      Command      |
+     +-------------------+          +-------------------+
+     |   setCommand()    |  Command |   execute()      |
+     |   pressButton()   | <------> |                   |
+     +-------------------+          +-------------------+
+            |                            ^
+            |                            |
++-------------------+          +-------------------+
+|   LightOnCommand   |          |   LightOffCommand  |
++-------------------+          +-------------------+
+|  execute()         |          |  execute()         |
+|  Light turnOn()    |          |  Light turnOff()   |
++-------------------+          +-------------------+
+             \                          /
+              \                       /
+               \                    /
+                +-----------------+
+                     Light
+
+or
+
+        +-------------------+             +-------------------+
+        |   RemoteControl   |             |      Command      |
+        +-------------------+             +-------------------+
+        | - command: Command|             |    void execute() |
+        +-------------------+             +-------------------+
+                |                                 ^
+                | uses                            |
+                |                                 |
+                v                                 |
+        +-------------------+             +-------------------+
+        |   LightOnCommand  |             |   LightOffCommand |
+        +-------------------+             +-------------------+
+        | - light: Light    |             | - light: Light    |
+        +-------------------+             +-------------------+
+        | + execute()       |             | + execute()       |
+        +-------------------+             +-------------------+
+                |                                 ^
+                | uses                            |
+                |                                 |
+                v                                 |
+        +-------------------+             +-------------------+
+        |       Light       |             |      Client       |
+        +-------------------+             +-------------------+
+        | + turnOn()        |             | + main()          |
+        | + turnOff()       |             |                   |
+        +-------------------+             +-------------------+
+
+
+```java
+// Command Interface
+interface Command {
+    void execute();
+}
+
+// Concrete Commands
+class LightOnCommand implements Command {
+    private Light light;
+
+    public LightOnCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.turnOn();
+    }
+}
+
+class LightOffCommand implements Command {
+    private Light light;
+
+    public LightOffCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.turnOff();
+    }
+}
+
+// Receiver (Light)
+class Light {
+    public void turnOn() {
+        System.out.println("Light is on");
+    }
+
+    public void turnOff() {
+        System.out.println("Light is off");
+    }
+}
+
+// Invoker (Remote Control)
+class RemoteControl {
+    private Command command;
+
+    public void setCommand(Command command) {
+        this.command = command;
+    }
+
+    public void pressButton() {
+        command.execute();
+    }
+}
+
+// Client Code
+public class CommandExample {
+    public static void main(String[] args) {
+        RemoteControl remote = new RemoteControl();
+        Light light = new Light();
+
+        Command lightOnCommand = new LightOnCommand(light);
+        Command lightOffCommand = new LightOffCommand(light);
+
+        remote.setCommand(lightOnCommand);
+        remote.pressButton(); // Light is on
+
+        remote.setCommand(lightOffCommand);
+        remote.pressButton(); // Light is off
+    }
+}
+```
+
+**How to Identify When to Apply the Command Design Pattern:**
+
+1. **Request Encapsulation:** When you want to encapsulate a request or operation as an object, allowing for parameterization
+ and decoupling the sender from the receiver.
+
+2. **Undo/Redo Operations:** If you need to support undo and redo functionality by storing command objects and their state.
+
+3. **Queueing Requests:** When you want to queue requests, prioritize them, or even log them for future processing.
+
+**Where to Apply the Command Design Pattern:**
+
+- **GUI Components:** Handling user actions like button clicks, menu selections, and keyboard shortcuts.
+
+- **Remote Controls:** Implementing remote controls for devices, home automation, or entertainment systems.
+
+- **Transaction Management:** Managing database transactions using command objects that encapsulate database operations.
+
+- **Logging and Auditing:** Storing and processing audit logs, where each log entry is represented by a command.
+
+By applying the Command Design Pattern, you can achieve flexible and decoupled communication between objects, enabling
+the ability to parameterize and queue requests, support undo/redo operations, and create more maintainable and extensible code.
